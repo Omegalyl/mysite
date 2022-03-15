@@ -24,9 +24,20 @@ def slug(request, single_slug):
             {"p_ones": series_urls}
         )
     
-    projects = [p.project_slug for p in Project.objects.all()]
-    if single_slug in projects:
-        return HttpResponse(f"{single_slug} is a project!!!")
+    projects_slug = [p.project_slug for p in Project.objects.all()]
+    if single_slug in projects_slug:
+        this_project = Project.objects.get(project_slug=single_slug)
+        project_from_series = Project.objects.filter(project_series__series=this_project.project_series).order_by('project_published')
+
+        this_project_idx = list(project_from_series).index(this_project)
+        return render(
+            request,
+            "main/project.html",
+            {'project': this_project,
+             'sidebar': project_from_series,
+             'this_project_idx': this_project_idx
+            },
+        )
 
     return HttpResponse(f"{single_slug} does not correspond to anything.")
 
